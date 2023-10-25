@@ -53,11 +53,11 @@ if [ ! -f ${SLAPD_CONF_DIR}/${INSTALL_CONTROL_FILE} ]; then
     if [ ! -z "$SLAPD_ROOTPW" ]; then
         echo "INFO: Var \"SLAPD_ROOTPW\"is set. "
         echo -n "Setting hashed RootDN password...               "
-        SLAPD_ROOTPW_HASH=$(slappasswd -o module-load=${PASSWORD_LOAD_MODULE} -h ${SLAPD_PASSWORD_HASH} -s "$SLAPD_ROOTPW")
+        SLAPD_ROOTPW_HASH=$(slappasswd -o module-load=${PASSWORD_LOAD_MODULE} -h {${SLAPD_PASSWORD_HASH}} -s "$SLAPD_ROOTPW")
         echo "[ DONE ]"
     elif [[ -z "$SLAPD_ROOTPW_HASH" && -s /run/secrets/$SLAPD_ROOTPW_SECRET ]]; then
         echo -n "Setting hashed RootDN password...                "
-        SLAPD_ROOTPW_HASH=$(slappasswd -o module-load=${PASSWORD_LOAD_MODULE} -h ${SLAPD_PASSWORD_HASH} -s "$(cat /run/secrets/$SLAPD_ROOTPW_SECRET)")
+        SLAPD_ROOTPW_HASH=$(slappasswd -o module-load=${PASSWORD_LOAD_MODULE} -h {${SLAPD_PASSWORD_HASH}} -s "$(cat /run/secrets/$SLAPD_ROOTPW_SECRET)")
          echo "[ DONE ]"
     fi
 
