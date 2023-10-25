@@ -40,12 +40,12 @@ ENV SLAPD_DN_ATTR=uid \
     SLAPD_ROOTPW_SECRET=openldap-ro-password \
     SLAPD_SUFFIX= \
     SLAPD_ULIMIT=2048 \
-    SLAPD_USERPW_SECRET=openldap-user-passwords
+    SLAPD_USERPW_SECRET=openldap-user-passwords\
+    SLAPD_PASSWORD_HASH=ARGON2
 
 ENV LDAP_PORT=389 \
-    LDAPS_PORT=636 \
-    PASSWORD_LOAD_MODULE=pw-pbkdf2.so \
-    PASSWORD_HASH={PBKDF2-SHA512}
+    LDAPS_PORT=636
+    #PASSWORD_LOAD_MODULE=
 
 RUN apk add --update --no-cache \
             gettext \
