@@ -23,6 +23,7 @@ services:
       SLAPD_PWD_MAX_FAILURE:   ${SLAPD_PWD_MAX_FAILURE}
       SLAPD_ROOTPW_SECRET:     ${SLAPD_ROOTPW_SECRET}
       SLAPD_USERPW_SECRET:     ${SLAPD_USERPW_SECRET}
+      SLAPD_PASSWORD_HASH:     ${SLAPD_PASSWORD_HASH}
     hostname: ${HOSTNAME0}.${DOMAINNAME}
     volumes:
       - ${DOCKERDIR}/data/prepopulate:/etc/openldap/prepopulate:ro
