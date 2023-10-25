@@ -177,7 +177,9 @@ echo "|          Starting OpenLDAP service...         |"
 echo "+-----------------------------------------------+"
 echo ""
 
-echo "Forward the output to log file."
+echo "INFO: Start openLDAP version \"${OPENLDAP_VERSION}\""
+echo ""
+echo "INFO: Forward the output to log file."
 tail -f -n0 /var/log/slapd-audit.log |
     sed "s/^${SLAPD_PWD_ATTRIBUTE}::.*/${SLAPD_PWD_ATTRIBUTE}:: --redacted--/" &
 (   sleep 10
