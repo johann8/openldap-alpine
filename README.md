@@ -1,21 +1,16 @@
-## openldap
-[![](https://img.shields.io/docker/v/instantlinux/openldap?sort=date)](https://hub.docker.com/r/instantlinux/openldap/tags "Version badge") [![](https://img.shields.io/docker/image-size/instantlinux/openldap?sort=date)](https://github.com/instantlinux/docker-tools/tree/main/images/openldap "Image badge") ![](https://img.shields.io/badge/platform-amd64%20arm64%20arm%2Fv6%20arm%2Fv7-blue "Platform badge") [![](https://img.shields.io/badge/dockerfile-latest-blue)](https://gitlab.com/instantlinux/docker-tools/-/blob/main/images/openldap/Dockerfile "dockerfile")
+<h1 align="center">OpenLDAP</h1>
+<p align='justify'>
+<a href="https://openldap.org)">OpenLDAP</a>OpenLDAP
+</p>
 
-This is OpenLDAP in a tiny alpine container, with simple setup. All features and capabilities are supported.
+## OCS Inventory Docker Image
+| pull | size alpine | version | platform | alpine version |
+|:---------------------------------:|:----------------------------------:|:--------------------------------:|:--------------------------------:|:--------------------------------:|
+| ![Docker Pulls](https://img.shields.io/docker/pulls/johann8/alpine-openldap?logo=docker&label=pulls&style=flat-square&color=blue) | ![Docker Image Size](https://img.shields.io/docker/image-size/johann8/alpine-openldap/latest?logo=docker&style=flat-square&color=blue&sort=semver) | [![](https://img.shields.io/docker/v/johann8/alpine-openldap/latest?logo=docker&style=flat-square&color=blue&sort=semver)](https://hub.docker.com/r/johann8/alpine-openldap/tags "Version badge") | ![](https://img.shields.io/badge/platform-amd64-blue "Platform badge") | [![Alpine Version](https://img.shields.io/badge/Alpine%20version-v3.18.0-blue.svg?style=flat-square)](https://alpinelinux.org/) |
 
-Why this new image (in 2022), when there are others? The dinkel and osixia images fell out of maintenance, so the only current maintained alternative is the larger / more complex / single-platform bitnami.
+## Install OpenLDAP
 
-### Usage
-
-Set environment variables as shown below, and mount a blank storage volume as `/var/lib/openldap/openldap-data`. Optionally, put your users and groups into ldif format (see [example](https://github.com/instantlinux/docker-tools/blob/main/images/openldap/example-users.ldif)) and mount them as `/etc/openldap/prepopulate`, and/or add TLS certifates under `/etc/ssl/openldap`.
-
-Example kubernetes and docker-compose resource definition files are provided here along with a helm chart. This repo has complete instructions for
-[building a kubernetes cluster](https://github.com/instantlinux/docker-tools/blob/main/k8s/README.md) where you can launch with [helm](https://github.com/instantlinux/docker-tools/tree/main/images/openldap/helm) using _make_ and customizing [Makefile.vars](https://github.com/instantlinux/docker-tools/blob/main/k8s/Makefile.vars) after cloning this repo:
-~~~
-git clone https://github.com/instantlinux/docker-tools.git
-cd docker-tools/k8s
-make openldap
-~~~
+- create folders
 
 ### Variables
 
@@ -68,9 +63,3 @@ Secret | Description
 openldap-rootpw | Hashed password (key name openldap-rootpw-hash)
 openldap-ssl | Certificate (cacert.pem, tls.crt, tls.key)
 openldap-user-passwords | Hashed passwords (in _user: {PBK...} hash_ form)
-
-### Contributing
-
-If you want to make improvements to this image, see [CONTRIBUTING](https://github.com/instantlinux/docker-tools/blob/main/CONTRIBUTING.md).
-
-[![](https://img.shields.io/badge/license-OpenLDAP-red.svg)](https://git.openldap.org/openldap/openldap/-/blob/master/LICENSE "License badge") [![](https://img.shields.io/badge/code-openldap%2Fopenldap-blue.svg)](https://git.openldap.org/openldap/openldap "Code repo")
