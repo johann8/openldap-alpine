@@ -1,0 +1,67 @@
+version: "3.2"
+networks:
+  ldapNet:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET}.0/24
+
+services:
+  openldap:
+    image: johann8/alpine-openldap:${VERSION_OPENLDAP:-latest}
+    container_name: openldap
+    restart: unless-stopped
+    environment:
+      SLAPD_ROOTDN:            ${SLAPD_ROOTDN}
+      SLAPD_ROOTPW:            ${SLAPD_ROOTPW}
+      SLAPD_ROOTPW_HASH:       ${SLAPD_ROOTPW_HASH}
+      SLAPD_ORGANIZATION:      ${SLAPD_ORGANIZATION}
+      SLAPD_FQDN:              ${SLAPD_FQDN}
+      SLAPD_SUFFIX:            ${SLAPD_SUFFIX}
+      SLAPD_PWD_CHECK_QUALITY: ${SLAPD_PWD_CHECK_QUALITY}
+      SLAPD_PWD_MIN_LENGTH:    ${SLAPD_PWD_MIN_LENGTH}
+      SLAPD_PWD_MAX_FAILURE:   ${SLAPD_PWD_MAX_FAILURE}
+      SLAPD_ROOTPW_SECRET:     ${SLAPD_ROOTPW_SECRET}
+      SLAPD_USERPW_SECRET:     ${SLAPD_USERPW_SECRET}
+    hostname: ${HOSTNAME0}.${DOMAINNAME}
+    volumes:
+      - ${DOCKERDIR}/data/prepopulate:/etc/openldap/prepopulate:ro
+      - ${DOCKERDIR}/data/ldapdb:/var/lib/openldap/openldap-data
+      - ${DOCKERDIR}/data/ssl:/etc/ssl/openldap
+      - ${DOCKERDIR}/data/config/ldap/ldif:/etc/openldap/ldif:ro
+      - ${DOCKERDIR}/data/config/ldap/slapd.d:/etc/openldap/slapd.d
+    ports:
+      - ${PORT_LDAP:-389}:389
+      - ${PORT_LDAPS:-636}:636
+    networks:
+      - ldapNet
+    secrets:
+      - ${SLAPD_ROOTPW_SECRET}
+      - ${SLAPD_USERPW_SECRET}
+
+  phpldapadmin:
+    image: johann8/phpldapadmin:${PLA_VERSION}
+    container_name: phpldapadmin
+    restart: unless-stopped
+    #volumes:
+      #- ${DOCKERDIR}/data/html:/var/www/html
+    #ports:
+      #- ${PORT_PLA:-8083}:8080
+    environment:
+      - TZ=${TZ}
+      - PHPLDAPADMIN_LANGUAGE=${PHPLDAPADMIN_LANGUAGE}
+      - PHPLDAPADMIN_PASSWORD_HASH=${PHPLDAPADMIN_PASSWORD_HASH}
+      - PHPLDAPADMIN_SERVER_NAME=${PHPLDAPADMIN_SERVER_NAME}
+      - PHPLDAPADMIN_SERVER_HOST=${PHPLDAPADMIN_SERVER_HOST}
+      - PHPLDAPADMIN_BIND_ID=${PHPLDAPADMIN_BIND_ID}
+    depends_on:
+      - openldap
+    networks:
+      - ldapNet
+
+secrets:
+  openldap-root-password:
+    file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_ROOTPW_SECRET}
+  openldap-user-passwords:
+    file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_USERPW_SECRET}
+
