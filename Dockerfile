@@ -44,8 +44,8 @@ ENV SLAPD_DN_ATTR=uid \
     SLAPD_PASSWORD_HASH=ARGON2
 
 ENV LDAP_PORT=389 \
-    LDAPS_PORT=636
-    #PASSWORD_LOAD_MODULE=
+    LDAPS_PORT=636 \
+    PASSWORD_LOAD_MODULE=argon2.so
 
 RUN apk add --update --no-cache \
             gettext \
