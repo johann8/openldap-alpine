@@ -1,6 +1,6 @@
 <h1 align="center">OpenLDAP</h1>
 <p align='justify'>
-<a href="https://openldap.org)">OpenLDAP</a>OpenLDAP
+<a href="https://openldap.org)">OpenLDAP</a> OpenLDAP ist eine Implementierung des Lightweight Directory Access Protocol (LDAP), die als freie Software unter der der BSD-Lizenz ähnlichen OpenLDAP Public License veröffentlicht wird.
 </p>
 
 ## OCS Inventory Docker Image
