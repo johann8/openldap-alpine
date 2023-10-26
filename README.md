@@ -10,7 +10,216 @@
 
 ## Install OpenLDAP
 
-- create folders
+- create folders, files and set rights
+
+```bash
+mkdir -p /opt/openldap/data/{prepopulate,ldapdb,ssl,config}
+mkdir -p /opt/openldap/data/config/ldap/{slapd.d,ldif,secrets}
+touch /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
+touch /opt/openldap/data/config/ldap/secrets/openldap-root-password
+chmod 0600 /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
+chmod 0600 /opt/openldap/data/config/ldap/secrets/openldap-root-password
+chown 100:101 /opt/openldap/data/config/ldap/slapd.d
+tree /opt/openldap/
+```
+- create docker-compose.yml
+```bash
+vim /opt/openldap/docker-compose.yml
+------------------------------------
+version: "3.2"
+networks:
+  ldapNet:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET}.0/24
+
+services:
+  openldap:
+    image: johann8/alpine-openldap:${VERSION_OPENLDAP:-latest}
+    container_name: openldap
+    restart: unless-stopped
+    environment:
+      SLAPD_ROOTDN:            ${SLAPD_ROOTDN}
+      SLAPD_ROOTPW:            ${SLAPD_ROOTPW}
+      SLAPD_ROOTPW_HASH:       ${SLAPD_ROOTPW_HASH}
+      SLAPD_ORGANIZATION:      ${SLAPD_ORGANIZATION}
+      SLAPD_FQDN:              ${SLAPD_FQDN}
+      SLAPD_SUFFIX:            ${SLAPD_SUFFIX}
+      SLAPD_PWD_CHECK_QUALITY: ${SLAPD_PWD_CHECK_QUALITY}
+      SLAPD_PWD_MIN_LENGTH:    ${SLAPD_PWD_MIN_LENGTH}
+      SLAPD_PWD_MAX_FAILURE:   ${SLAPD_PWD_MAX_FAILURE}
+      SLAPD_ROOTPW_SECRET:     ${SLAPD_ROOTPW_SECRET}
+      SLAPD_USERPW_SECRET:     ${SLAPD_USERPW_SECRET}
+      SLAPD_PASSWORD_HASH:     ${SLAPD_PASSWORD_HASH}
+    hostname: ${HOSTNAME0}.${DOMAINNAME}
+    volumes:
+      - ${DOCKERDIR}/data/prepopulate:/etc/openldap/prepopulate:ro
+      - ${DOCKERDIR}/data/ldapdb:/var/lib/openldap/openldap-data
+      - ${DOCKERDIR}/data/ssl:/etc/ssl/openldap
+      - ${DOCKERDIR}/data/config/ldap/ldif:/etc/openldap/ldif:ro
+      - ${DOCKERDIR}/data/config/ldap/slapd.d:/etc/openldap/slapd.d
+    ports:
+      - ${PORT_LDAP:-389}:389
+      - ${PORT_LDAPS:-636}:636
+    networks:
+      - ldapNet
+    secrets:
+      - ${SLAPD_ROOTPW_SECRET}
+      - ${SLAPD_USERPW_SECRET}
+
+  phpldapadmin:
+    image: johann8/phpldapadmin:${PLA_VERSION}
+    container_name: phpldapadmin
+    restart: unless-stopped
+    #volumes:
+      #- ${DOCKERDIR}/data/html:/var/www/html
+    #ports:
+      #- ${PORT_PLA:-8083}:8080
+    environment:
+      - TZ=${TZ}
+      - PHPLDAPADMIN_LANGUAGE=${PHPLDAPADMIN_LANGUAGE}
+      - PHPLDAPADMIN_PASSWORD_HASH=${PHPLDAPADMIN_PASSWORD_HASH}
+      - PHPLDAPADMIN_SERVER_NAME=${PHPLDAPADMIN_SERVER_NAME}
+      - PHPLDAPADMIN_SERVER_HOST=${PHPLDAPADMIN_SERVER_HOST}
+      - PHPLDAPADMIN_BIND_ID=${PHPLDAPADMIN_BIND_ID}
+    depends_on:
+      - openldap
+    networks:
+      - ldapNet
+
+secrets:
+  openldap-root-password:
+    file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_ROOTPW_SECRET}
+  openldap-user-passwords:
+    file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_USERPW_SECRET}
+```
+
+- create .env
+
+```bash
+vim .env
+-----------
+#### SYSTEM
+TZ=Europe/Berlin
+DOCKERDIR=/opt/openldap
+
+### Network
+DOMAINNAME=mydomain.de
+HOSTNAME0=ldap
+PORT_LDAP=389
+PORT_LDAPS=636
+SUBNET=172.26.12
+
+### === APP OpenLDAP ===
+VERSION_OPENLDAP=latest
+SLAPD_ORGANIZATION="My Organisation"
+SLAPD_FQDN=${DOMAINNAME}
+SLAPD_SUFFIX="dc=mydomain,dc=de"
+SLAPD_ROOTDN="cn=admin,${SLAPD_SUFFIX}"
+SLAPD_OU="ou=Users,"
+# Plain-text admin password (pwgen -1cnsB 25 3)
+SLAPD_ROOTPW=MySuperPaSSwOrD
+SLAPD_ROOTPW_HASH=
+SLAPD_PASSWORD_HASH=ARGON2
+SLAPD_PWD_CHECK_QUALITY=2
+SLAPD_PWD_MIN_LENGTH=10
+SLAPD_PWD_MAX_FAILURE=5
+SLAPD_ROOTPW_SECRET=openldap-root-password
+SLAPD_USERPW_SECRET=openldap-user-passwords
+
+### === PHPLDAPAdmin Alpine ===
+DOMAINNAME_PLA=int.mydomain.de
+HOSTNAME_PLA=pla
+PORT_PLA=8080
+LA_VERSION=latest
+#PLA_VERSION=0.0.4.1
+PLA_VERSION=latest
+PHPLDAPADMIN_LANGUAGE="de_DE"
+PHPLDAPADMIN_PASSWORD_HASH="ssha"
+PHPLDAPADMIN_SERVER_NAME="${SLAPD_ORGANIZATION} LDAP Server"
+PHPLDAPADMIN_SERVER_HOST="ldap://${HOSTNAME0}.${DOMAINNAME}"
+PHPLDAPADMIN_BIND_ID="cn=admin,${SLAPD_SUFFIX}"
+#PHPLDAPADMIN_BIND_ID="cn=admin,dc=int,dc=mydomain,dc=de"
+
+# change rights
+chmod 0600 /opt/openldap/.env
+```
+
+- create docker-compose.override.yml (For PhpLdapAdmin behind RP Traefik)
+
+```bash
+vi docker-compose.override.yml
+---------------------------
+version: "3.2"
+services:
+
+  phpldapadmin:
+    labels:
+      - "traefik.enable=true"
+      ### ==== to https ====
+      - "traefik.http.routers.phpldapadmin-secure.entrypoints=websecure"
+      - "traefik.http.routers.phpldapadmin-secure.rule=Host(`${HOSTNAME_PLA}.${DOMAINNAME_PLA}`)"
+      - "traefik.http.routers.phpldapadmin-secure.tls=true"
+      - "traefik.http.routers.phpldapadmin-secure.tls.certresolver=production"  # für eigene Zertifikate
+      ### ==== to service ====
+      - "traefik.http.routers.phpldapadmin-secure.service=phpldapadmin"
+      - "traefik.http.services.phpldapadmin.loadbalancer.server.port=${PORT_PLA}"
+      - "traefik.docker.network=proxy"
+      ### ==== redirect to authelia for secure login ====
+      - "traefik.http.routers.phpldapadmin-secure.middlewares=rate-limit@file,secHeaders@file"
+      #- "traefik.http.routers.phpldapadmin-secure.middlewares=authelia@docker,rate-limit@file,secHeaders@file"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+```
+
+- Copy certifikate from ACME docker container
+
+```bash
+# copy cert from docker01
+scp /opt/acme/data/acmedata/\*.wassermanngruppe.de_ecc/fullchain.cer root@pbs01:/opt/openldap/data/ssl/cert.pem
+scp /opt/acme/data/acmedata/\*.wassermanngruppe.de_ecc/\*.wassermanngruppe.de.cer root@pbs01:/opt/openldap/data/ssl/tls.pem
+scp /opt/acme/data/acmedata/\*.wassermanngruppe.de_ecc/\*.wassermanngruppe.de.key root@pbs01:/opt/openldap/data/ssl/tls.key
+
+# change rights
+chmod 0644 /opt/openldap/data/ssl/*
+ls -lah /opt/openldap/data/ssl/
+
+# show certificate
+openssl x509 -in /opt/openldap/data/ssl/tls.crt -text -noout
+```
+- create dhparam file
+
+```bash
+openssl dhparam -dsaparam -out /opt/openldap/data/ssl/dhparam2.pem 4096
+chmod 0644 /opt/openldap/data/ssl/*
+ls -la /opt/openldap/data/ssl/
+```
+- Create an start docker container
+
+```bash
+docker-compose up -d
+docker-compose ps
+docker-compose logs
+```
+
+
+```bash
+# over API
+dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "" -s base '(objectclass=*)' namingContexts
+
+# over ldap
+cat /opt/openldap/.env
+dcexec openldap ldapsearch -x -H ldap://localhost -b dc=mydomain,dc=de -D "cn=admin,dc=mydomain,dc=de" -W
+
+# over ldaps
+cat /opt/openldap/.env
+dcexec openldap ldapsearch -x -H ldaps://localhost -b dc=mydomain,dc=de -D "cn=admin,dc=mydomain,dc=de" -W
+```
 
 ### Variables
 
@@ -34,24 +243,28 @@
 | SLAPD_SUFFIX | (based on `SLAPD_FQDN`) | Suffix of DN |
 | SLAPD_ULIMIT | 2048 | maximum file size |
 | SLAPD_USERPW_SECRET | openldap-user-passwords | Name of secret to hold pws |
+| SLAPD_PASSWORD_HASH | ARGON2 | encrypted with {ARGON2} |
 
 If overriding default root DN, it should be specified in the form `cn=admin,dc=example,dc=com`.
 
 The root password must be specified in one of three ways:
 
 * `SLAPD_ROOTPW` - plain text value, only for testing
-* `SLAPD_ROOTPW_HASH` - encrypted value starting with `{PBKDF2-SHA512}`
+* `SLAPD_ROOTPW_HASH` - encrypted value starting with `{ARGON2}`
 * `openldap-ro-password` secret - most secure place to store the hash
 
 You will want to override values for `SLAPD_FQDN` and `SLAPD_ORGANIZATION`. All the other default values will work for many typical use-cases.
 
 User passwords are normally initialized by the administrator using `ldappasswd`, and from then on updated by the user (through the same tool or protocol). With this image, you can also define user passwords by providing their (hashed) values via a secret. Don't use `ldappasswd` to update passwords that are provided with the latter method: use it to generate a new hashed value and update the secret.
+
 ### Volumes
 
 Mount these path names to persistent storage; all are optional.
 
 Path | Description
 ---- | -----------
+/etc/openldap/slapd.d | Persistent storage for SLAPD config
+/etc/openldap/ldif | Persistent storage for produced ldifs
 /etc/openldap/prepopulate | Zero or more .ldif files to load upon startup
 /var/lib/openldap/openldap-data | Persistent storage for ldap database
 /etc/ssl/openldap | TLS/SSL certificate
@@ -62,4 +275,4 @@ Secret | Description
 ------ | -----------
 openldap-rootpw | Hashed password (key name openldap-rootpw-hash)
 openldap-ssl | Certificate (cacert.pem, tls.crt, tls.key)
-openldap-user-passwords | Hashed passwords (in _user: {PBK...} hash_ form)
+openldap-user-passwords | Hashed passwords (in _user: {ARGON2} hash form)
