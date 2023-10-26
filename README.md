@@ -132,21 +132,18 @@ SLAPD_USERPW_SECRET=openldap-user-passwords
 DOMAINNAME_PLA=int.mydomain.de
 HOSTNAME_PLA=pla
 PORT_PLA=8080
-LA_VERSION=latest
-#PLA_VERSION=0.0.4.1
 PLA_VERSION=latest
 PHPLDAPADMIN_LANGUAGE="de_DE"
 PHPLDAPADMIN_PASSWORD_HASH="ssha"
 PHPLDAPADMIN_SERVER_NAME="${SLAPD_ORGANIZATION} LDAP Server"
 PHPLDAPADMIN_SERVER_HOST="ldap://${HOSTNAME0}.${DOMAINNAME}"
 PHPLDAPADMIN_BIND_ID="cn=admin,${SLAPD_SUFFIX}"
-#PHPLDAPADMIN_BIND_ID="cn=admin,dc=int,dc=mydomain,dc=de"
 
 # change rights
 chmod 0600 /opt/openldap/.env
 ```
 
-- create docker-compose.override.yml (For PhpLdapAdmin behind RP Traefik)
+- create docker-compose.override.yml (For [phpldapadmin](https://github.com/johann8/phpldapadmin) behind RP Traefik)
 
 ```bash
 vi docker-compose.override.yml
@@ -207,6 +204,7 @@ docker-compose ps
 docker-compose logs
 ```
 
+- check access to ldap server
 
 ```bash
 # over API
