@@ -1,39 +1,40 @@
-# RootDN
+## RootDN
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
 
-# Log level
+## Log level
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b cn=config "(objectClass=olcGlobal)" olcLogLevel -LLL -Q
 
-# PW Policy
+## PW Policy
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "dc=wassermanngruppe,dc=de" -LLL -Q "(cn=passwordDefault)"
 dcexec openldap slapcat -n 0
 
-# PasswordHash
+## PasswordHash
 dcexec openldap slapcat -n 0 -a olcPasswordHash=*
 
-# supportedSASLMechanisms
+## supportedSASLMechanisms
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "" -LLL -s base supportedSASLMechanisms
 dcexec openldap ldapsearch -x -H ldap://localhost -s base -b "" -D "cn=admin,dc=wassermanngruppe,dc=de" -W -LLL supportedSASLMechanisms
 dcexec openldap ldapsearch -x -H ldaps://localhost -s base -b "" -D "cn=admin,dc=wassermanngruppe,dc=de" -W -LLL supportedSASLMechanisms
 dcexec openldap ldapsearch -ZZ -x -H ldap://localhost -s base -b "" -D "cn=admin,dc=wassermanngruppe,dc=de" -W -LLL supportedSASLMechanisms
 
-# TLS
+## TLS
 dcexec openldap slapcat -b "cn=config" | grep olcTLS
 
-# Show access permission 
+## Show access permission 
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b cn=config '(olcDatabase={1}mdb)' olcAccess
 
-# Show modules
+## Show modules
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "cn=config" -LLL -Q "objectClass=olcModuleList"
 dcexec openldap slapcat -n 0 | grep -i module
 
-# Show backends
+## Show backends
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "cn=config" -LLL -Q "objectClass=olcBackendConfig"
 
-# Show databases
+## Show databases
 dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "cn=config" -LLL -Q "olcDatabase=*" dn
 
-# 
+## keys 
+```
   -b basedn  base dn for search
   -f file    read operations from `file'
   -F prefix  URL prefix for files (default: file:///tmp/)
@@ -71,3 +72,4 @@ dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b "
   -y file    Read password from file
   -Y mech    SASL mechanism
   -Z         Start TLS request (-ZZ to require successful response)
+```
