@@ -4,6 +4,9 @@
 </p>
 
 - [OpenLDAP Docker Image](#openldap-docker-image)
+- [Variables](#variables)
+- [Volumes](#volumes)
+- [Secrets](#secrets)
 - [Install OpenLDAP](#install-openldap)
   - [Traefik integration](#traefik-integration)
   - [Authelia integration](#authelia-integration)
@@ -15,7 +18,7 @@
 |:---------------------------------:|:----------------------------------:|:--------------------------------:|:--------------------------------:|:--------------------------------:|
 | ![Docker Pulls](https://img.shields.io/docker/pulls/johann8/alpine-openldap?logo=docker&label=pulls&style=flat-square&color=blue) | ![Docker Image Size](https://img.shields.io/docker/image-size/johann8/alpine-openldap/latest?logo=docker&style=flat-square&color=blue&sort=semver) | [![](https://img.shields.io/docker/v/johann8/alpine-openldap/latest?logo=docker&style=flat-square&color=blue&sort=semver)](https://hub.docker.com/r/johann8/alpine-openldap/tags "Version badge") | ![](https://img.shields.io/badge/platform-amd64-blue "Platform badge") | [![Alpine Version](https://img.shields.io/badge/Alpine%20version-v3.18.0-blue.svg?style=flat-square)](https://alpinelinux.org/) |
 
-### Variables
+## Variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
@@ -51,7 +54,7 @@ You will want to override values for `SLAPD_FQDN` and `SLAPD_ORGANIZATION`. All 
 
 User passwords are normally initialized by the administrator using `ldappasswd`, and from then on updated by the user (through the same tool or protocol). With this image, you can also define user passwords by providing their (hashed) values via a secret. Don't use `ldappasswd` to update passwords that are provided with the latter method: use it to generate a new hashed value and update the secret.
 
-### Volumes
+## Volumes
 
 Mount these path names to persistent storage; all are optional.
 
@@ -63,7 +66,7 @@ Path | Description
 /var/lib/openldap/openldap-data | Persistent storage for ldap database
 /etc/ssl/openldap | TLS/SSL certificate
 
-### Secrets
+## Secrets
 
 Secret | Description
 ------ | -----------
@@ -160,7 +163,7 @@ secrets:
     file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_USERPW_SECRET}
 ```
 
-- create .env
+- create `.env` file
 
 ```bash
 vim .env
@@ -194,7 +197,7 @@ SLAPD_ROOTPW_SECRET=openldap-root-password
 SLAPD_USERPW_SECRET=openldap-user-passwords
 
 ### === PHPLDAPAdmin Alpine ===
-DOMAINNAME_PLA=int.mydomain.de
+DOMAINNAME_PLA=mydomain.de
 HOSTNAME_PLA=pla
 PORT_PLA=8080
 PLA_VERSION=latest
