@@ -4,9 +4,10 @@
 </p>
 
 - [OpenLDAP Docker Image](#openldap-docker-image)
-
 - [Install OpenLDAP](#install-openldap)
   - [Traefik integration](#traefik-integration)
+  - [Authelia integration](#authelia-integration)
+  - [PhpLdapAdmin integration](#phpldapadmin-integration)
 
 
 ## OpenLDAP Docker Image
@@ -137,7 +138,6 @@ services:
     container_name: phpldapadmin
     restart: unless-stopped
     #volumes:
-
       #- ${DOCKERDIR}/data/html:/var/www/html
     #ports:
       #- ${PORT_PLA:-8083}:8080
@@ -286,4 +286,68 @@ networks:
   proxy:
     external: true
 ```
+
+- add middleware `authelia` into traefik config file
+
+```bash
+vim /opt/traefik/data/conf/traefik.yml
+--------------------------------------
+...
+http:
+...
+  middlewares:
+...
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/verify?rd=https://auth.mydomain.de"
+        trustForwardHeader: true
+...
+
+# restart `Traefik` docker container
+cd /opt/traefik && docker-compose up -d
+```
+
+## Authelia integration
+
+- add domainname for PhpLdapAdmin web 
+
+```bash
+vim /opt/authelia/data/authelia/config/configuration.yml
+--------------------------------------------------------
+...
+access_control:
+  default_policy: deny 
+  rules:
+    - domain:
+...
+      - 'pla.mydomain.de'
+      policy: one_factor
+...
+
+# restart `Authelia` docker container
+cd /opt/authelia && docker-compose up -d
+```
+
+## PhpLdapAdmin integration
+
+- change `docker-compose.override.yml` as below
+
+```bash
+vim /opt/openldap/docker-compose.override.yml
+---------------------------------
+version: "3.2"
+services:
+
+  phpldapadmin:
+    labels:
+      - "traefik.enable=true"
+...
+      #- "traefik.http.routers.phpldapadmin-secure.middlewares=rate-limit@file,secHeaders@file"
+      - "traefik.http.routers.phpldapadmin-secure.middlewares=authelia@docker,rate-limit@file,secHeaders@file"
+    networks:
+      - proxy
+...
+```
+
+Enjoy !
 
