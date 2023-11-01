@@ -26,6 +26,7 @@ services:
       SLAPD_PASSWORD_HASH:     ${SLAPD_PASSWORD_HASH}
     hostname: ${HOSTNAME0}.${DOMAINNAME}
     volumes:
+      - ${DOCKERDIR}/data/backup:/data/backup
       - ${DOCKERDIR}/data/prepopulate:/etc/openldap/prepopulate:ro
       - ${DOCKERDIR}/data/ldapdb:/var/lib/openldap/openldap-data
       - ${DOCKERDIR}/data/ssl:/etc/ssl/openldap
@@ -34,6 +35,13 @@ services:
     ports:
       - ${PORT_LDAP:-389}:389
       - ${PORT_LDAPS:-636}:636
+    labels:
+      ofelia.enabled: "true"
+      #ofelia.job-exec.slapd_backup_config.schedule: "@every 24h"
+      ofelia.job-exec.slapd_backup_config.schedule: "0 0 2 * * *"
+      ofelia.job-exec.slapd_backup_config.command: "/bin/sh -c \"/sbin/slapd-backup.sh 0 slapd-config || exit 0\""
+      ofelia.job-exec.slapd_backup_data.schedule: "0 0 2 * * *"
+      ofelia.job-exec.slapd_backup_data.command: "/bin/sh -c \"/sbin/slapd-backup.sh 1 slapd-data || exit 0\""
     networks:
       - ldapNet
     secrets:
@@ -60,9 +68,26 @@ services:
     networks:
       - ldapNet
 
+  ofelia-openldap:
+    image: mcuadros/ofelia:latest
+    container_name: ofelia
+    restart: always
+    command: daemon --docker
+    environment:
+      - TZ=${TZ}
+    depends_on:
+      - openldap
+    labels:
+      ofelia.enabled: "true"
+    security_opt:
+      - label=disable
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - ldapNet
+
 secrets:
   openldap-root-password:
     file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_ROOTPW_SECRET}
   openldap-user-passwords:
     file: ${DOCKERDIR}/data/config/ldap/secrets/${SLAPD_USERPW_SECRET}
-
