@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # set variables
-_VERSION=0.0.5.1
+_VERSION=0.0.5.3
 _TAG=alpine-openldap
 
 # build image glpi
