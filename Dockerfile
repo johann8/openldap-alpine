@@ -47,6 +47,9 @@ ENV LDAP_PORT=389 \
     LDAPS_PORT=636 \
     PASSWORD_LOAD_MODULE=argon2.so
 
+# for backup
+ENV LDAP_BACKUP_TTL=15
+
 RUN apk add --update --no-cache \
             gettext \
             gzip \
@@ -67,13 +70,15 @@ RUN rm -rf /var/cache/apk/*
 
 #RUN if [ -d /etc/openldap/slapd.d ]; then rm -rf /etc/openldap/slapd.d; fi
 
-VOLUME  [ "/etc/openldap/prepopulate", "/etc/openldap/slapd.d", "/var/lib/openldap/openldap-data", "/etc/ssl/openldap" ]
+VOLUME  [ "/etc/openldap/prepopulate", "/etc/openldap/slapd.d", "/var/lib/openldap/openldap-data", "/etc/ssl/openldap", "/data/backup" ]
 
 EXPOSE 389/tcp 636/tcp
 
 COPY slapd.conf /root/
 
 COPY ldif/ /root/ldif/
+
+COPY rootfs/ /
 
 COPY entrypoint.sh /usr/local/bin/
 
