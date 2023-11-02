@@ -294,7 +294,9 @@ networks:
     external: true
 ```
 
-- add middleware `authelia` into traefik config file
+## Authelia integration
+
+- `traefik` container: add middleware `authelia` into traefik config file
 
 ```bash
 vim /opt/traefik/data/conf/traefik.yml
@@ -314,9 +316,7 @@ http:
 cd /opt/traefik && docker-compose up -d
 ```
 
-## Authelia integration
-
-- add domainname for PhpLdapAdmin web 
+- `authelia` container: add FQDN for PhpLdapAdmin web `pla.mydomain.de`
 
 ```bash
 vim /opt/authelia/data/authelia/config/configuration.yml
@@ -330,14 +330,9 @@ access_control:
       - 'pla.mydomain.de'
       policy: one_factor
 ...
-
-# restart `Authelia` docker container
-cd /opt/authelia && docker-compose up -d
 ```
 
-## PhpLdapAdmin integration
-
-- change `docker-compose.override.yml` as below
+- `openldap` container: change `docker-compose.override.yml` as below
 
 ```bash
 vim /opt/openldap/docker-compose.override.yml
@@ -354,11 +349,46 @@ services:
     networks:
       - proxy
 ...
+
+# restart `Authelia` docker container
+cd /opt/authelia && docker-compose up -d
+```
+
+## PhpLdapAdmin integration
+
+- add `phpldapadmin` service [Description here](https://github.com/johann8/phpldapadmin)
+
+```bash
+vim /opt/openldap/docker-compose.yml
+---------------------------------
+version: "3.2"
+...
+services:
+...
+  phpldapadmin:
+    #image: johann8/alpine-glpi:${VERSION}
+    image: johann8/phpldapadmin:${PLA_VERSION}
+    container_name: phpldapadmin
+    restart: unless-stopped
+    #volumes:
+      #- ${DOCKERDIR}/data/html:/var/www/html
+    ports:
+      - 8083:8080
+    environment:
+      - TZ=${TZ}
+      - PHPLDAPADMIN_LANGUAGE=${PHPLDAPADMIN_LANGUAGE}
+      - PHPLDAPADMIN_PASSWORD_HASH=${PHPLDAPADMIN_PASSWORD_HASH}
+      - PHPLDAPADMIN_SERVER_NAME=${PHPLDAPADMIN_SERVER_NAME}
+      - PHPLDAPADMIN_SERVER_HOST=${PHPLDAPADMIN_SERVER_HOST}
+      - PHPLDAPADMIN_BIND_ID=${PHPLDAPADMIN_BIND_ID}
+    networks:
+      - phpldapadminNet
+...
 ```
 
 ## Olefia integration
 
-- Add labels to `openldap` service
+- add `ofelia` labels to `openldap` service
 
 ```bash
 vim /opt/openldap/docker-compose.yml
@@ -377,7 +407,7 @@ services:
 ...
 ```
 
-- Add `ofelia-openldap` service
+- Add `ofelia-openldap` service (If you already have `olefia` container, then you do not need to create another)
 
 ```bash
 vim /opt/openldap/docker-compose.yml
