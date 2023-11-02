@@ -61,6 +61,7 @@ Mount these path names to persistent storage; all are optional.
 
 Path | Description
 ---- | -----------
+/data/backup | Persistent storage for Backups
 /etc/openldap/slapd.d | Persistent storage for SLAPD config
 /etc/openldap/ldif | Persistent storage for produced ldifs
 /etc/openldap/prepopulate | Zero or more .ldif files to load upon startup
@@ -82,7 +83,7 @@ openldap-user-passwords | Hashed passwords (in _user: {ARGON2} hash form)
 - create folders, files and set rights
 
 ```bash
-mkdir -p /opt/openldap/data/{prepopulate,ldapdb,ssl,config}
+mkdir -p /opt/openldap/data/{prepopulate,ldapdb,ssl,config,backup}
 mkdir -p /opt/openldap/data/config/ldap/{slapd.d,ldif,secrets}
 touch /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
 touch /opt/openldap/data/config/ldap/secrets/openldap-root-password
