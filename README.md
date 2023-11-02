@@ -330,6 +330,9 @@ access_control:
       - 'pla.mydomain.de'
       policy: one_factor
 ...
+
+# restart `authelia` docker container
+cd /opt/authelia && docker-compose up -d
 ```
 
 - `openldap` container: change `docker-compose.override.yml` as below
@@ -350,8 +353,8 @@ services:
       - proxy
 ...
 
-# restart `Authelia` docker container
-cd /opt/authelia && docker-compose up -d
+# restart `openldap` docker container
+cd /opt/openldap && docker-compose up -d
 ```
 
 ## PhpLdapAdmin integration
@@ -387,6 +390,8 @@ services:
 ```
 
 ## Olefia integration
+
+[Ofelia](https://github.com/mcuadros/ofelia) is a modern and low footprint job scheduler for docker environments, built on Go. We make a backup of `slapd` with the help of this service.
 
 - add `ofelia` labels to `openldap` service
 
