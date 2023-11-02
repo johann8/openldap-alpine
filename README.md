@@ -124,6 +124,7 @@ services:
       SLAPD_PASSWORD_HASH:     ${SLAPD_PASSWORD_HASH}
     hostname: ${HOSTNAME0}.${DOMAINNAME}
     volumes:
+      - ${DOCKERDIR}/data/backup:/data/backup
       - ${DOCKERDIR}/data/prepopulate:/etc/openldap/prepopulate:ro
       - ${DOCKERDIR}/data/ldapdb:/var/lib/openldap/openldap-data
       - ${DOCKERDIR}/data/ssl:/etc/ssl/openldap
