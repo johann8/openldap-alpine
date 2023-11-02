@@ -11,6 +11,7 @@
   - [Traefik integration](#traefik-integration)
   - [Authelia integration](#authelia-integration)
   - [PhpLdapAdmin integration](#phpldapadmin-integration)
+  - [Olefia integration](#olefia-integration)
 
 
 ## OpenLDAP Docker Image
@@ -352,6 +353,56 @@ services:
       - "traefik.http.routers.phpldapadmin-secure.middlewares=authelia@docker,rate-limit@file,secHeaders@file"
     networks:
       - proxy
+...
+```
+
+## Olefia integration
+
+- Add labels to `openldap` service
+
+```bash
+vim /opt/openldap/docker-compose.yml
+---------------------------------
+version: "3.2"
+...
+services:
+  openldap:
+...
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.slapd_backup_config.schedule: "0 0 2 * * *"
+      ofelia.job-exec.slapd_backup_config.command: "/bin/sh -c \"/sbin/slapd-backup.sh 0 slapd-config || exit 0\""
+      ofelia.job-exec.slapd_backup_data.schedule: "0 0 2 * * *"
+      ofelia.job-exec.slapd_backup_data.command: "/bin/sh -c \"/sbin/slapd-backup.sh 1 slapd-data || exit 0\""
+...
+```
+
+- Add `ofelia-openldap` service
+
+```bash
+vim /opt/openldap/docker-compose.yml
+---------------------------------
+version: "3.2"
+...
+services:
+...
+  ofelia-openldap:
+    image: mcuadros/ofelia:latest
+    container_name: ofelia
+    restart: always
+    command: daemon --docker
+    environment:
+      - TZ=${TZ}
+    depends_on:
+      - openldap
+    labels:
+      ofelia.enabled: "true"
+    security_opt:
+      - label=disable
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - ldapNet
 ...
 ```
 
