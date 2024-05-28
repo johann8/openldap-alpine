@@ -513,7 +513,7 @@ dc up -d
 # Check the result
 dcexec openldap ldapsearch -Q -LLL -Y EXTERNAL -H ldapi://%2Frun%2Fopenldap%2Fldapi -b cn=config postfix-book
 ```
-
+- From now on the OpenLDAP config database is extended by the schema `postfix-book.schema`.
 
 Enjoy !
 
