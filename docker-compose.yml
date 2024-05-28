@@ -32,6 +32,8 @@ services:
       - ${DOCKERDIR}/data/ssl:/etc/ssl/openldap
       - ${DOCKERDIR}/data/config/ldap/ldif:/etc/openldap/ldif:ro
       - ${DOCKERDIR}/data/config/ldap/slapd.d:/etc/openldap/slapd.d
+      - ${DOCKERDIR}/data/config/ldap/custom-schema:/etc/openldap/custom-schema
+      - ${DOCKERDIR}/data/config/ldap/secrets:/run/secrets
     ports:
       - ${PORT_LDAP:-389}:389
       - ${PORT_LDAPS:-636}:636
