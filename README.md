@@ -12,7 +12,7 @@
   - [Authelia integration](#authelia-integration)
   - [PhpLdapAdmin integration](#phpldapadmin-integration)
   - [Olefia integration](#olefia-integration)
-
+  - [Add ldap schema  to old docker container](#add-ldap-schema-to-old-docker-container)
 
 ## OpenLDAP Docker Image 🐋
 Image is based on [Alpine 3.20](https://hub.docker.com/repository/docker/johann8/alpine-openldap/general)
@@ -443,6 +443,77 @@ services:
       - ldapNet
 ...
 ```
+
+## Add ldap schema to old docker container
+
+As of `docker image version 0.1.1`, I have also added the `postfix-book` schema.
+Unfortunately, I could not find a way to add this schema automatically. I kept getting the error: \
+"ldap_add: Other (e.g., implementation specific) error (80) additional info: olcAttributeTypes: Unexpected token before  SINGLE-VALUE )" \
+Below you will find a description of how to add the schema `postfix-book.schema` to docker container before `docker image version 0.1.1` manually.
+
+
+```bash
+# Docker container stoppen
+cd /opt/openldap && \
+dc down
+
+# Customize the .env file. As of this version, the schema postfix-book.schema is available in the Docker image.
+vim .env
+----------------
+### === APP OpenLDAP ===
+VERSION_OPENLDAP=0.1.1
+----------------
+
+# Create a backup
+mv data data_bkp
+
+# Create folder
+mkdir -p /opt/openldap/data/{prepopulate,ldapdb,ssl,config,backup}
+mkdir -p /opt/openldap/data/config/ldap/{slapd.d,ldif,secrets,custom-schema}
+touch /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
+touch /opt/openldap/data/config/ldap/secrets/openldap-root-password
+chmod 0600 /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
+chmod 0600 /opt/openldap/data/config/ldap/secrets/openldap-root-password
+chown 100:101 /opt/openldap/data/config/ldap/slapd.d
+tree /opt/openldap/
+
+# Start the Docker container. The LDIF postfix-book.ldif is generated.
+dc up -d
+
+# Save the generated LDIF postfix-book.ldif to “custom-schema”. Adjust the number if necessary.
+dcexec openldap sh
+cd /etc/openldap/slapd.d/cn=config/cn=schema/
+ls -la
+cp cn={6}postfix-book.ldif ../../../custom-schema/
+chown ldap:ldap ../../../custom-schema/cn=\{6}postfix-book.ldif
+ls -la ../../../custom-schema/
+exit
+
+# Stop Conteiner, restore backup and copy LDIF postfix-book.ldif to folder “cn=schema”.
+dc down 
+mv data data_new
+mv data_bkp data
+cp data_new/config/ldap/custom-schema/cn\=\{6\}postfix-book.ldif data/config/ldap/slapd.d/cn\=config/cn\=schema/
+ls -la data/config/ldap/slapd.d/cn\=config/cn\=schema/
+chown 100:101 /opt/openldap/data/config/ldap/slapd.d/cn\=config/cn\=schema/cn\=\{6\}postfix-book.ldif
+ls -la data/config/ldap/slapd.d/cn\=config/cn\=schema/
+
+# Customize the .env file. 
+vim .env
+----------------
+### === APP OpenLDAP ===
+VERSION_OPENLDAP=latest
+----------------
+
+# Delete old Docker image and start Docker container.
+docker images -a
+docker rmi 11f6169e8b47
+dc up -d
+
+# Check the result
+dcexec openldap ldapsearch -Q -LLL -Y EXTERNAL -H ldapi://%2Frun%2Fopenldap%2Fldapi -b cn=config postfix-book
+```
+
 
 Enjoy !
 
