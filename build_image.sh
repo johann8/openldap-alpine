@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # set variables
-_VERSION=0.0.5.3
+_VERSION=0.1.1
 _TAG=alpine-openldap
 
-# build image glpi
+# build image openldap
 DOCKER_BUILDKIT=0; docker build -t johann8/${_TAG}:${_VERSION} . 2>&1 | tee ./build.log
 _BUILD=$?
 if ! [ ${_BUILD} = 0 ]; then
