@@ -1,6 +1,6 @@
 <h1 align="center">OpenLDAP</h1>
 <p align='justify'>
-<a href="https://openldap.org)">OpenLDAP</a> OpenLDAP ist eine Implementierung des Lightweight Directory Access Protocol (LDAP), die als freie Software unter der der BSD-Lizenz ähnlichen OpenLDAP Public License veröffentlicht wird.
+<a href="https://openldap.org)">OpenLDAP</a> ist eine Implementierung des Lightweight Directory Access Protocol (LDAP), die als freie Software unter der der BSD-Lizenz ähnlichen OpenLDAP Public License veröffentlicht wird.
 </p>
 
 - [OpenLDAP Docker Image](#openldap-docker-image)
@@ -15,7 +15,7 @@
 
 
 ## OpenLDAP Docker Image 🐋
-Image is based on [Alpine 3.20](https://hub.docker.com/repository/docker/johann8/alpine-openldap/general).
+Image is based on [Alpine 3.20](https://hub.docker.com/repository/docker/johann8/alpine-openldap/general)
 
 | pull | size alpine | version | platform | alpine version |
 |:---------------------------------:|:----------------------------------:|:--------------------------------:|:--------------------------------:|:--------------------------------:|
@@ -87,7 +87,7 @@ openldap-user-passwords | Hashed passwords (in _user: {ARGON2} hash form)
 
 ```bash
 mkdir -p /opt/openldap/data/{prepopulate,ldapdb,ssl,config,backup}
-mkdir -p /opt/openldap/data/config/ldap/{slapd.d,ldif,secrets}
+mkdir -p /opt/openldap/data/config/ldap/{slapd.d,ldif,secrets,custom-schema}
 touch /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
 touch /opt/openldap/data/config/ldap/secrets/openldap-root-password
 chmod 0600 /opt/openldap/data/config/ldap/secrets/openldap-user-passwords
@@ -133,6 +133,8 @@ services:
       - ${DOCKERDIR}/data/ssl:/etc/ssl/openldap
       - ${DOCKERDIR}/data/config/ldap/ldif:/etc/openldap/ldif:ro
       - ${DOCKERDIR}/data/config/ldap/slapd.d:/etc/openldap/slapd.d
+      - ${DOCKERDIR}/data/config/ldap/custom-schema:/etc/openldap/custom-schema
+      - ${DOCKERDIR}/data/config/ldap/secrets:/run/secrets
     ports:
       - ${PORT_LDAP:-389}:389
       - ${PORT_LDAPS:-636}:636
@@ -221,9 +223,9 @@ chmod 0600 /opt/openldap/.env
 
 ```bash
 # copy cert from docker01
-scp /opt/acme/data/acmedata/\*.wassermanngruppe.de_ecc/fullchain.cer root@pbs01:/opt/openldap/data/ssl/cert.pem
-scp /opt/acme/data/acmedata/\*.wassermanngruppe.de_ecc/\*.wassermanngruppe.de.cer root@pbs01:/opt/openldap/data/ssl/tls.pem
-scp /opt/acme/data/acmedata/\*.wassermanngruppe.de_ecc/\*.wassermanngruppe.de.key root@pbs01:/opt/openldap/data/ssl/tls.key
+scp /opt/acme/data/acmedata/\*.mydomain.de_ecc/fullchain.cer root@pbs01:/opt/openldap/data/ssl/cert.pem
+scp /opt/acme/data/acmedata/\*.mydomain.de_ecc/\*.mydomain.de.cer root@pbs01:/opt/openldap/data/ssl/tls.pem
+scp /opt/acme/data/acmedata/\*.mydomain.de_ecc/\*.mydomain.de.key root@pbs01:/opt/openldap/data/ssl/tls.key
 
 # change rights
 chmod 0644 /opt/openldap/data/ssl/*
@@ -371,7 +373,6 @@ version: "3.2"
 services:
 ...
   phpldapadmin:
-    #image: johann8/alpine-glpi:${VERSION}
     image: johann8/phpldapadmin:${PLA_VERSION}
     container_name: phpldapadmin
     restart: unless-stopped
@@ -387,7 +388,7 @@ services:
       - PHPLDAPADMIN_SERVER_HOST=${PHPLDAPADMIN_SERVER_HOST}
       - PHPLDAPADMIN_BIND_ID=${PHPLDAPADMIN_BIND_ID}
     networks:
-      - phpldapadminNet
+      - ldapNet
 ...
 ```
 
