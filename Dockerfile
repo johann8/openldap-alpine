@@ -1,6 +1,6 @@
 ARG ARCH=
 
-ARG BASE_IMAGE=alpine:3.18
+ARG BASE_IMAGE=alpine:3.20
 
 FROM ${ARCH}${BASE_IMAGE}
 
@@ -20,7 +20,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 #ARG OPENLDAP_VERSION=2.6.5-r0
 
-ENV OPENLDAP_VERSION=2.6.5-r0
+ENV OPENLDAP_VERSION=2.6.7-r0
 
 ENV TZ=Europe/Berlin
 
@@ -63,6 +63,7 @@ RUN apk add --update --no-cache \
             openldap-overlay-memberof \
             openldap-overlay-ppolicy \
             openldap-overlay-refint \
+            openldap-overlay-syncprov \
             ca-certificates
 
 # Remove alpine cache
@@ -70,7 +71,7 @@ RUN rm -rf /var/cache/apk/*
 
 #RUN if [ -d /etc/openldap/slapd.d ]; then rm -rf /etc/openldap/slapd.d; fi
 
-VOLUME  [ "/etc/openldap/prepopulate", "/etc/openldap/slapd.d", "/var/lib/openldap/openldap-data", "/etc/ssl/openldap", "/data/backup" ]
+VOLUME  [ "/etc/openldap/prepopulate", "/etc/openldap/slapd.d", "/var/lib/openldap/openldap-data", "/etc/ssl/openldap", "/data/backup", "/etc/openldap/custom-schema" ]
 
 EXPOSE 389/tcp 636/tcp
 
