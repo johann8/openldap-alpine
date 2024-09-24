@@ -20,7 +20,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 #ARG OPENLDAP_VERSION=2.6.5-r0
 
-ENV OPENLDAP_VERSION=2.6.7-r0
+ENV OPENLDAP_VERSION=2.6.8-r0
 
 ENV TZ=Europe/Berlin
 
