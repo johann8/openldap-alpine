@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # set variables
-_VERSION=0.1.2
+_VERSION=0.1.3
 _TAG=alpine-openldap
 
 # build image openldap
