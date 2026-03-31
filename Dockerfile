@@ -1,6 +1,6 @@
 ARG ARCH=
 
-ARG BASE_IMAGE=alpine:3.21
+ARG BASE_IMAGE=alpine:3.23
 
 FROM ${ARCH}${BASE_IMAGE}
 
@@ -18,9 +18,8 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url=https://github.com/instantlinux/docker-tools
 
-#ARG OPENLDAP_VERSION=2.6.5-r0
 
-ENV OPENLDAP_VERSION=2.6.8-r0
+ENV OPENLDAP_VERSION=2.6.10-r0
 
 ENV TZ=Europe/Berlin
 
