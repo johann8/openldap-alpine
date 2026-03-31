@@ -10,7 +10,7 @@ LABEL Maintainer="JH <jh@localhost>" \
 ARG BUILD_DATE
 ARG NAME
 ARG VCS_REF
-ARG VERSION
+ARG OPENLDAP_VERSION=2.6.10-r0
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.license=GPL-3.0 \
@@ -19,7 +19,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url=https://github.com/instantlinux/docker-tools
 
 
-ENV OPENLDAP_VERSION=2.6.10-r0
+ENV OPENLDAP_VERSION=${OPENLDAP_VERSION}
 
 ENV TZ=Europe/Berlin
 
