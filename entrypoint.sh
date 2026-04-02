@@ -183,13 +183,14 @@ fi
 # run service
 echo ""
 echo "+-----------------------------------------------+"
-echo "|          Starting OpenLDAP service...         |"
+echo "|      Starting OpenLDAP Server ${OPENLDAP_VERSION}       |"
 echo "+-----------------------------------------------+"
 echo ""
 
-echo "INFO: Start openLDAP version \"${OPENLDAP_VERSION}\""
-echo ""
+# echo "INFO: Start openLDAP version \"${OPENLDAP_VERSION}\""
+# echo ""
 echo "INFO: Forward the output to log file."
+echo ""
 tail -f -n0 /var/log/slapd-audit.log |
     sed "s/^${SLAPD_PWD_ATTRIBUTE}::.*/${SLAPD_PWD_ATTRIBUTE}:: --redacted--/" &
 (   sleep 10
@@ -211,15 +212,13 @@ tail -f -n0 /var/log/slapd-audit.log |
     fi
 ) &
 # Start openLDAP Servie
-exec slapd -h "${HOST_PARAM} ${SLAPD_IPC_URL}" -F ${SLAPD_CONF_DIR} -u ldap -g ldap -d "${SLAPD_LOG_LEVEL}"
-
-echo ""
-echo "+-----------------------------------------------+"
-echo "|   OpenLDAP Server ${OPENLDAP_VERSION} was launched!   |"
-echo "+-----------------------------------------------+"
-
-#exec slapd -h "${HOST_PARAM} ldapi:///" -F ${SLAPD_CONF_DIR} -u ldap -g ldap -d "${SLAPD_LOG_LEVEL}"
+if [[ "${RESTORE_OPENLDAP}" == "true" ]]; then
+   # run bash
+   exec /bin/bash
+else
+   # run slapd
+   exec slapd -h "${HOST_PARAM} ${SLAPD_IPC_URL}" -F ${SLAPD_CONF_DIR} -u ldap -g ldap -d "${SLAPD_LOG_LEVEL}"
+fi
 
 # Run slapd service
-
 #exec slapd -h "${SLAPD_URLPREFIX}:/// ${SLAPD_IPC_URL}" -F ${SLAPD_CONF_DIR} -u ldap -g ldap -d "${SLAPD_LOG_LEVEL}"
