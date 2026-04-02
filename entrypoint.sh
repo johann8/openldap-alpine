@@ -211,7 +211,7 @@ tail -f -n0 /var/log/slapd-audit.log |
        ldapmodify -Y EXTERNAL -H ${SLAPD_IPC_URL}
     fi
 ) &
-# Start openLDAP Servie
+# Start slapd service | bash
 if [[ "${SLAPD_RECOVERY_MODE}" == "true" ]]; then
    # run bash
    exec /bin/bash
