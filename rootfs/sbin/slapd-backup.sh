@@ -146,7 +146,7 @@ gzip -dk data/backup/2026-04-02_T21-12_slapd_data.ldif.gz
 # change file .env (When starting the container instead of the slapd service, /bin/bash is executed)
 vim .env
 ---
-RESTORE_OPENLDAP=true
+SLAPD_RECOVERY_MODE=true
 ---
 
 # restore slapd data
@@ -168,7 +168,7 @@ exit
 # change file .env (When starting containers, the slapd service is run)
 vim .env
 ---
-RESTORE_OPENLDAP=false
+SLAPD_RECOVERY_MODE=false
 ---
 
 # rerun docker container
