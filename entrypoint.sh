@@ -212,7 +212,7 @@ tail -f -n0 /var/log/slapd-audit.log |
     fi
 ) &
 # Start openLDAP Servie
-if [[ "${RESTORE_OPENLDAP}" == "true" ]]; then
+if [[ "${SLAPD_RECOVERY_MODE}" == "true" ]]; then
    # run bash
    exec /bin/bash
 else
