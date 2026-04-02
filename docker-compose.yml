@@ -24,6 +24,10 @@ services:
       SLAPD_ROOTPW_SECRET:     ${SLAPD_ROOTPW_SECRET}
       SLAPD_USERPW_SECRET:     ${SLAPD_USERPW_SECRET}
       SLAPD_PASSWORD_HASH:     ${SLAPD_PASSWORD_HASH}
+
+      # false | true - If true: When starting the container instead of the slapd service, /bin/bash is executed
+      SLAPD_RECOVERY_MODE:     ${SLAPD_RECOVERY_MODE:-false} 
+
     hostname: ${HOSTNAME0}.${DOMAINNAME}
     volumes:
       - ${DOCKERDIR}/data/backup:/data/backup
