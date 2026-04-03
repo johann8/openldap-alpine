@@ -1,5 +1,8 @@
-#!/bin/sh -e
+#### entrypoint.sh
+#!/bin/sh
+set -e
 
+# Vars
 SLAPD_CONF_DIR=/etc/openldap/slapd.d
 SLAPD_DATA_DIR=/var/lib/openldap/openldap-data
 SLAPD_URLPREFIX=ldap
@@ -30,8 +33,9 @@ ulimit -n $SLAPD_ULIMIT
 
 ### Start slapd service | bash
 if [[ "${SLAPD_RECOVERY_MODE}" == "true" ]]; then
-   # run bash
-   exec /bin/bash
+   # ??? Not working yet
+   echo "Run Container in Recovery Mode"
+   exec bash "$@"
 else
    if [ -f ${SLAPD_CONF_DIR}/${INSTALL_CONTROL_FILE} ]; then
       echo ""

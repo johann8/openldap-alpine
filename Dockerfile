@@ -52,6 +52,8 @@ ENV LDAP_BACKUP_TTL=15
 RUN apk add --update --no-cache \
             gettext \
             gzip \
+            tzdata \
+            bash \
             openldap=$OPENLDAP_VERSION \
             openldap-clients \
             openldap-back-mdb \
@@ -82,4 +84,6 @@ COPY rootfs/ /
 
 COPY entrypoint.sh /usr/local/bin/
 
-ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
+#ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
+
+ENTRYPOINT [ "/bin/bash", "/usr/local/bin/entrypoint.sh" ]
