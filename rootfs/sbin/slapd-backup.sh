@@ -5,11 +5,12 @@
 # DBNUM=$1
 
 ### CUSTOM vars
+SCRIPT_START_TIME=$SECONDS                                # Script start time
 SCRIPT_NAME="slapd-backup.sh"
 BASENAME=${SCRIPT_NAME}
 SCRIPT_VERSION="0.0.4"
-%Y%m%dT%H%M%S
 TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+_DATUM="$(date '+%Y-%m-%d %Hh:%Mm:%Ss')"
 FILENAME=$2
 BACKUP_PATH="/data/backup"
 BACKUP_FILE_CONFIG="${BACKUP_PATH}/${TIMESTAMP}_${FILENAME}_config.ldif"
@@ -51,6 +52,12 @@ show_help() {
     echo ""
 }
 
+#
+### Main script
+#
+echo -e "Info: Started on \"$(hostname -f)\" at \"${_DATUM}\""
+echo -e "Info: Script version is: \"${SCRIPT_VERSION}\""
+
 ### Check the parameters passed to the script
 if [[ $# -eq 0 ]]; then
    echo "Info: You have not specified any parameters."
@@ -74,34 +81,42 @@ for POS_PAR in $1; do
    case ${POS_PAR} in
       0)
          DBNUM_CONFIG=0
-         echo "Info: Backup SLAPD configuration."
-
-         # Back up config file and compress it
-         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_CONFIG} -l ${BACKUP_FILE_CONFIG} && \
-         chmod 600 ${BACKUP_FILE_CONFIG} && \ 
-         ${GZIP_COMMAND} -8 ${BACKUP_FILE_CONFIG}
+         echo -n "Info: A backup of the \"SLAPD configuration\" is being created..." && \
+         # Back up slapd config  and compress it
+         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_CONFIG} -l ${BACKUP_FILE_CONFIG} >&2 && \
+         chmod 600 ${BACKUP_FILE_CONFIG} >&2 && \
+         echo "[ DONE ]"
+         echo -n "Info: A Backup files are compressed...                         " && \
+         ${GZIP_COMMAND} -8 ${BACKUP_FILE_CONFIG} >&2 && \
+         echo "[ DONE ]"
          shift
          ;;
       1)
          DBNUM_DATA=1
-         echo "Info: Backup SLAPD data."
-
-         # Back up data file and compress it
-         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_DATA} -l ${BACKUP_FILE_DATA} && \
-         chmod 600 ${BACKUP_FILE_DATA} && \
-         ${GZIP_COMMAND} -8 ${BACKUP_FILE_DATA}
+         echo -n "Info: A backup of the \"SLAPD data\" is being created...         " && \
+         # Back up slapd data and compress it
+         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_DATA} -l ${BACKUP_FILE_DATA} >&2 && \
+         chmod 600 ${BACKUP_FILE_DATA} >&2 && \
+         echo "[ DONE ]"
+         echo -n "Info: A Backup files are compressed...                         " && \
+         ${GZIP_COMMAND} -8 ${BACKUP_FILE_DATA} >&2 && \
+         echo "[ DONE ]"
          shift
          ;;
       all)
          DBNUM_CONFIG=0; DBNUM_DATA=1
-         echo "Info: Backup SLAPD configuration and data."
-
+         echo -n "Info: A backup of the \"SLAPD configuration\" is being created..." && \
          # Back up config and data file and compress them
-         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_CONFIG} -l ${BACKUP_FILE_CONFIG} && \
-         chmod 600 ${BACKUP_FILE_CONFIG} && \
-         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_DATA} -l ${BACKUP_FILE_DATA} && \
-         chmod 600 ${BACKUP_FILE_DATA} && \
-         ${GZIP_COMMAND} -8 ${BACKUP_FILE_CONFIG} ${BACKUP_FILE_DATA}
+         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_CONFIG} -l ${BACKUP_FILE_CONFIG} >&2 && \
+         chmod 600 ${BACKUP_FILE_CONFIG} >&2 && \
+         echo "[ DONE ]"
+         echo -n "Info: A backup of the \"SLAPD data\" is being created...         " && \
+         ${SLAPCAT_COMMAND} -F ${SLAPD_DIRECTORY} -n ${DBNUM_DATA} -l ${BACKUP_FILE_DATA} >&2 && \
+         chmod 600 ${BACKUP_FILE_DATA} >&2 && \
+         echo "[ DONE ]"
+         echo -n "Info: A Backup files are compressed...                         " && \
+         ${GZIP_COMMAND} -8 ${BACKUP_FILE_CONFIG} ${BACKUP_FILE_DATA} >&2 && \
+         echo "[ DONE ]"
          shift
          ;;
       *)
@@ -115,7 +130,13 @@ done
 find ${BACKUP_PATH} -type f -mtime +${LDAP_BACKUP_TTL} -exec rm {} \;
 
 echo ""
-echo "Info: Backup SLAPD configuration and data done"
+echo "Info: Backup SLAPD configuration and data done."
+
+END_TIME="$(date -R)"
+echo ""
+echo "---------------------------------------------------------------------" >&2
+echo "| Info: Script exiting normally at: $END_TIME |"
+echo "---------------------------------------------------------------------" >&2
 
 exit 0
 
@@ -146,7 +167,7 @@ gzip -dk data/backup/2026-04-02_T21-12_slapd_data.ldif.gz
 # change file .env (When starting the container instead of the slapd service, /bin/bash is executed)
 vim .env
 ---
-SLAPD_RECOVERY_MODE=true
+RESTORE_OPENLDAP=true
 ---
 
 # restore slapd data
@@ -168,7 +189,7 @@ exit
 # change file .env (When starting containers, the slapd service is run)
 vim .env
 ---
-SLAPD_RECOVERY_MODE=false
+RESTORE_OPENLDAP=false
 ---
 
 # rerun docker container
