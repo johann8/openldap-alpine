@@ -51,22 +51,47 @@ services:
       - ${SLAPD_USERPW_SECRET}
 
   phpldapadmin:
-    image: johann8/phpldapadmin:${PLA_VERSION}
+    image: docker.io/phpldapadmin/phpldapadmin:${PLA_VERSION:-2.3.4}
     container_name: phpldapadmin
     restart: unless-stopped
-    #volumes:
-      #- ${DOCKERDIR}/data/html:/var/www/html
-    #ports:
-      #- ${PORT_PLA:-8083}:8080
     environment:
-      - TZ=${TZ}
-      - PHPLDAPADMIN_LANGUAGE=${PHPLDAPADMIN_LANGUAGE}
-      - PHPLDAPADMIN_PASSWORD_HASH=${PHPLDAPADMIN_PASSWORD_HASH}
-      - PHPLDAPADMIN_SERVER_NAME=${PHPLDAPADMIN_SERVER_NAME}
-      - PHPLDAPADMIN_SERVER_HOST=${PHPLDAPADMIN_SERVER_HOST}
-      - PHPLDAPADMIN_BIND_ID=${PHPLDAPADMIN_BIND_ID}
+      ### === LDAP Configuration ===
+      - LDAP_HOST=${LDAP_HOST}
+      - LDAP_NAME==${LDAP_NAME}
+      - LDAP_PORT=${LDAP_PORT}
+      - LDAP_CONNECTION=${LDAP_CONNECTION}
+      - LDAP_BASE_DN=${LDAP_BASE_DN}
+      - LDAP_USERNAME=${LDAP_USERNAME}
+      - LDAP_LOGIN_ATTR=${LDAP_LOGIN_ATTR}
+      - LDAP_LOGIN_ATTR_DESC=${LDAP_LOGIN_ATTR_DESC}
+      - LDAP_LOGIN_OBJECTCLASS=${LDAP_LOGIN_OBJECTCLASS}
+      - LDAP_PASSWORD=${LDAP_PASSWORD}
+      - LDAP_ALLOW_GUEST=${LDAP_ALLOW_GUEST}
+      - LDAP_ALERT_ROOTDN=${LDAP_ALERT_ROOTDN}
+      - LDAP_CACHE=${LDAP_CACHE}
+
+      ### === phpLDAPAdmin APP Configuration ===
+      - APP_TIMEZONE=${APP_TIMEZONE}
+      - APP_UPDATE_CHECK=${APP_UPDATE_CHECK}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=${APP_DEBUG}
+
+      ### === Sonstige Configuration ===
+      - LOG_CHANNEL=${LOG_CHANNEL}
+      - CACHE_DRIVER=${CACHE_DRIVER}
+      #- SESSION_DRIVER=${SESSION_DRIVER}
+      #- SESSION_LIFETIME=${SESSION_LIFETIME}
+      - LDAP_TEMPLATE_UIDNUMBER_START=${LDAP_TEMPLATE_UIDNUMBER_START}
+      - LDAP_TEMPLATE_GIDNUMBER_START=${LDAP_TEMPLATE_GIDNUMBER_START}
+    volumes:
+      - ${DOCKERDIR}/data/pla2/sessions:/app/storage/framework/sessions
+      - ${DOCKERDIR}/data/pla2/logs:/app/storage/logs
+    #ports:
+    #  - 7070:8080
     depends_on:
-      - openldap
+      openldap:
+        condition: service_started
     networks:
       - ldapNet
 
