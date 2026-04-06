@@ -152,52 +152,81 @@ crontab -e
 ----
 
 ### Restore
+# stop monitoring tool monit
 systemctl stop monit
+
+# show database records
 cd /opt/openldap
+dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b 'dc=rohrkabel,dc=eu' '(uid=*)' | wc -l
+dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b 'dc=rohrkabel,dc=eu' '(objectclass=*)' | grep "^# numEntries".
+
+# stop docker stack
 docker compose down
 docker compose ps
-mv data/ldapdb/data.mdb data/ldapdb/data.mdb_old
-ls -la data/ldapdb/ 
+
+# run docker stack with overwritten entrypoint
+docker compose run -it --entrypoint=/bin/bash openldap
+/var/lib/openldap/openldap-data/
+ls -la /data/backup
+ls -la /etc/openldap/slapd.d/
+
+
+# Move slapd data folder to backup folder
+mkdir -p /data/backup/openldap-data_old
+mv /var/lib/openldap/openldap-data/* /data/backup/openldap-data_old/
+ls -lah /data/backup/openldap-data_old/
 
 # decompress backup files
-ls -la data/backup/
-gzip -dk data/backup/2026-04-02_T21-12_slapd_config.ldif.gz
-gzip -dk data/backup/2026-04-02_T21-12_slapd_data.ldif.gz
+ls -la /data/backup/
+gzip -dk /data/backup/2026-04-06_13-00-06_slapd_config.ldif.gz
+gzip -dk /data/backup/2026-04-06_13-00-06_slapd_data.ldif.gz
 
-# change file .env (When starting the container instead of the slapd service, /bin/bash is executed)
-vim .env
----
-RESTORE_OPENLDAP=true
----
 
 # restore slapd data
-docker compose up -d openldap
-docker compose exec openldap bash
-slapadd -n 1 -l /data/backup/2026-04-02_T21-12_slapd_data.ldif
+slapadd -n 1 -l /data/backup/2026-04-06_13-00-06_slapd_data.ldif
 ls -lah /var/lib/openldap/openldap-data/
 
 # restore slapd configuration (if needed)
-slapadd -n 0 -F /etc/openldap/slapd.d -l /data/backup/2026-04-02_T21-12_slapd_config.ldif
+mkdir -p /data/backup/slapd.d/
+mv /etc/openldap/slapd.d/* /data/backup/slapd.d/
+slapadd -n 0 -F /etc/openldap/slapd.d -l /data/backup/2026-04-06_13-00-06_slapd_config.ldif
+
+# copy slaps control file back into working directory
+cp /data/backup/slapd.d/openldap-config.control /etc/openldap/slapd.d/
 
 # Fix Permissions: Ensure the ldap user owns the restored files
 chown -R ldap:ldap /var/lib/openldap/openldap-data/
-ls -lah /var/lib/openldap/openldap-data/ 
+ls -lah /var/lib/openldap/openldap-data/
 chown -R ldap:ldap /etc/openldap/slapd.d/
 ls -lah /etc/openldap/slapd.d/
 exit
 
-# change file .env (When starting containers, the slapd service is run)
-vim .env
----
-RESTORE_OPENLDAP=false
----
+# remove temp docker container 
+docker ps -a --filter "status=exited"
+docker rm 5796f57db9fe
 
-# rerun docker container
-docker compose down
+# Start docker container and test
 docker compose up -d
 docker compose ps
 docker compose logs
 
-# run monit service 
+show database records
+dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b 'dc=rohrkabel,dc=eu' '(uid=*)' | wc -l
+dcexec openldap ldapsearch -H ldapi://%2Frun%2Fopenldap%2Fldapi -Y EXTERNAL -b 'dc=rohrkabel,dc=eu' '(objectclass=*)' | grep "^# numEntries".
+-----------------
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+# numEntries: 23
+-----------------
+
+# run monit service
 systemctl start monit
 systemctl status monit
+
+# Delete old files after test
+cd /opt/openldap
+rm -rf data/backup/slapd.d
+rm -rf data/backup/openldap-data_old
+rm -rf data/backup/*.ldif
+ls -la  data/backup/
