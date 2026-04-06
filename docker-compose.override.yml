@@ -1,24 +1,31 @@
-version: "3.2"
+---
 services:
 
   phpldapadmin:
     labels:
       - "traefik.enable=true"
-      ### ==== to https ====
+      - "traefik.docker.network=proxy"
+
+      ### ==== to routers ====
       - "traefik.http.routers.phpldapadmin-secure.entrypoints=websecure"
       - "traefik.http.routers.phpldapadmin-secure.rule=Host(`${HOSTNAME_PLA}.${DOMAINNAME_PLA}`)"
       - "traefik.http.routers.phpldapadmin-secure.tls=true"
-      - "traefik.http.routers.phpldapadmin-secure.tls.certresolver=production"  # für eigene Zertifikate
-      ### ==== to service ====
+      - "traefik.http.routers.phpldapadmin-secure.tls.certresolver=production"              # für eigene Zertifikate
+      - "traefik.http.routers.phpldapadmin-secure.tls.domains[0].main=ldap.${DOMAINNAME}"   # Für Letsencrypt: Set main domain
+      - "traefik.http.routers.phpldapadmin-secure.tls.domains[0].sans=pla.${DOMAINNAME}"    # Add SANs Hosts
+      - "traefik.http.routers.phpldapadmin-secure.tls.domains[1].sans=pla-storage.${DOMAINNAME_PLA}"
       - "traefik.http.routers.phpldapadmin-secure.service=phpldapadmin"
+
+      ### ==== to service ====
       - "traefik.http.services.phpldapadmin.loadbalancer.server.port=${PORT_PLA}"
-      - "traefik.docker.network=proxy"
-      ### ==== redirect to authelia for secure login ====
-      - "traefik.http.routers.phpldapadmin-secure.middlewares=rate-limit@file,secHeaders@file"
-      #- "traefik.http.routers.phpldapadmin-secure.middlewares=authelia@docker,rate-limit@file,secHeaders@file"
+
+      ### ==== redirect to authentik-proxy for secure login ====
+      #- "traefik.http.routers.phpldapadmin-secure.middlewares=rate-limit@file,secHeaders@file"
+      - "traefik.http.routers.phpldapadmin-secure.middlewares=chain-authentik-proxy@file"
     networks:
       - proxy
 
 networks:
   proxy:
     external: true
+
