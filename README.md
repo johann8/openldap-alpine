@@ -363,33 +363,126 @@ cd /opt/openldap && docker-compose up -d
 
 ## PhpLdapAdmin integration
 
-- add `phpldapadmin` service [Description here](https://github.com/johann8/phpldapadmin)
+`phpLDAPadmin` - Web based LDAP administration tool in der Version 1 wird nicht mehr weiter entwickelt. Stattdessen kommt `phpLDAPadmin` in der Version 2. Eine aktuelle Version findet man auf dem [Githab](https://github.com/leenooks/phpLDAPadmin). Der Entwickler stellt auch ein Docker Image auf dem [Docker Hub](https://hub.docker.com/r/phpldapadmin/phpldapadmin) bereit. Die Konfiguration von `phpLDAPadmin` muss wie folgt angepasst werden:
+
+- `phpldapadmin` Service zu `docker-compose.yml` hinzufügen 
 
 ```bash
 vim /opt/openldap/docker-compose.yml
----------------------------------
-version: "3.2"
+----
 ...
 services:
 ...
   phpldapadmin:
-    image: johann8/phpldapadmin:${PLA_VERSION}
+    image: docker.io/phpldapadmin/phpldapadmin:${PLA_VERSION:-2.3.4}
     container_name: phpldapadmin
     restart: unless-stopped
-    #volumes:
-      #- ${DOCKERDIR}/data/html:/var/www/html
-    ports:
-      - 8083:8080
     environment:
-      - TZ=${TZ}
-      - PHPLDAPADMIN_LANGUAGE=${PHPLDAPADMIN_LANGUAGE}
-      - PHPLDAPADMIN_PASSWORD_HASH=${PHPLDAPADMIN_PASSWORD_HASH}
-      - PHPLDAPADMIN_SERVER_NAME=${PHPLDAPADMIN_SERVER_NAME}
-      - PHPLDAPADMIN_SERVER_HOST=${PHPLDAPADMIN_SERVER_HOST}
-      - PHPLDAPADMIN_BIND_ID=${PHPLDAPADMIN_BIND_ID}
+      ### === LDAP Configuration ===
+      - LDAP_HOST=${LDAP_HOST}
+      - LDAP_NAME==${LDAP_NAME}
+      - LDAP_PORT=${LDAP_PORT}
+      - LDAP_CONNECTION=${LDAP_CONNECTION}
+      - LDAP_BASE_DN=${LDAP_BASE_DN}
+      - LDAP_USERNAME=${LDAP_USERNAME}
+      - LDAP_LOGIN_ATTR=${LDAP_LOGIN_ATTR}
+      - LDAP_LOGIN_ATTR_DESC=${LDAP_LOGIN_ATTR_DESC}
+      - LDAP_LOGIN_OBJECTCLASS=${LDAP_LOGIN_OBJECTCLASS}
+      - LDAP_PASSWORD=${LDAP_PASSWORD}
+      - LDAP_ALLOW_GUEST=${LDAP_ALLOW_GUEST}
+      - LDAP_ALERT_ROOTDN=${LDAP_ALERT_ROOTDN}
+      - LDAP_CACHE=${LDAP_CACHE}
+
+      ### === phpLDAPAdmin APP Configuration ===
+      - APP_TIMEZONE=${APP_TIMEZONE}
+      - APP_UPDATE_CHECK=${APP_UPDATE_CHECK}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=${APP_DEBUG}
+
+      ### === Sonstige Configuration ===
+      - LOG_CHANNEL=${LOG_CHANNEL}
+      - CACHE_DRIVER=${CACHE_DRIVER}
+      #- SESSION_DRIVER=${SESSION_DRIVER}
+      #- SESSION_LIFETIME=${SESSION_LIFETIME}
+      - LDAP_TEMPLATE_UIDNUMBER_START=${LDAP_TEMPLATE_UIDNUMBER_START}
+      - LDAP_TEMPLATE_GIDNUMBER_START=${LDAP_TEMPLATE_GIDNUMBER_START}
+    volumes:
+      - ${DOCKERDIR}/data/pla2/sessions:/app/storage/framework/sessions
+      - ${DOCKERDIR}/data/pla2/logs:/app/storage/logs
+    #ports:
+    #  - 7070:8080
+    depends_on:
+      openldap:
+        condition: service_started
     networks:
       - ldapNet
 ...
+----
+```
+
+- Datei `.env` anpassen
+
+```bash
+----
+...
+### === PhpLDAPadmin V2 ===
+DOMAINNAME_PLA="myfirma.eu"
+HOSTNAME_PLA="pla-storage"
+PORT_PLA=8080
+#PLA_VERSION=latest
+PLA_VERSION=2.3.9
+
+# APPs vars
+APP_URL=https://${HOSTNAME_PLA}.${DOMAINNAME_PLA}
+APP_NAME=Laravel
+APP_ENV=production
+# docker run -it --rm phpldapadmin/phpldapadmin ./artisan key:generate --show
+APP_KEY="base64:MyHashPassword"
+APP_DEBUG=true
+LOG_LEVEL=debug
+APP_UPDATE_CHECK=true
+APP_TIMEZONE=Europe/Berlin
+
+LOG_CHANNEL=daily # stack | daily | stderr
+CACHE_DRIVER=file
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+LDAP_HOST=openldap
+LDAP_NAME=" MyFirma LDAP Server"
+LDAP_PORT=636
+LDAP_CONNECTION=ldaps
+LDAP_BASE_DN="dc=myfirma,dc=eu"
+LDAP_USERNAME="cn=techuser,ou=System,dc=myfirma,dc=eu"
+LDAP_PASSWORD="MyPassword123"
+LDAP_LOGIN_ATTR=uid                                       # dn | uid
+LDAP_LOGIN_ATTR_DESC=uid
+LDAP_LOGIN_OBJECTCLASS=inetOrgPerson,posixAccount,top
+LDAP_TEMPLATE_UIDNUMBER_START=10000
+LDAP_TEMPLATE_GIDNUMBER_START=10000
+LDAP_ALLOW_GUEST=false
+LDAP_ALERT_ROOTDN=false
+LDAP_CACHE=false
+----
+```
+
+- `Docker Image` laden und Docker Container neu starten
+
+```bash
+docker compose pull
+docker compose down
+docker compose up -d
+docker compose ps
+docker compose logs -f
+```
+
+- Altes Docker Image löschen
+
+```bash
+docker images -a
+docker rmi [container id]
 ```
 
 ## Olefia integration
