@@ -485,7 +485,34 @@ docker images -a
 docker rmi [container id]
 ```
 
-## Olefia integration
+## Sicherung mit Hilfe von Bashscript (bevorzugt)
+
+Für die Sicherung von OpenLDAP wird [Ofelia](https://github.com/mcuadros/ofelia) nicht mehr benutzt. Ich habe ein [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) für die Sicherung geschrieben. Das Script befindet sich im Container im Pfad `/sbinslapd-backup.sh`. Für die regelmaessige Sichernug muss man ein `Cronjob` erstellen.
+
+- Hilfe zum Script abrufen
+
+```bash
+cd /opt/openldap
+docker compose exec openldap /sbin/slapd-backup.sh help
+```
+
+- Crontab editor aufrufen
+
+```bash
+crontab -e
+```
+
+- Zur Sicherung von sowohl `Daten` als auch `Konfiguration` folgende Zeilen einfügen
+
+```bash
+#min hour day mon dow command
+15   20    *   *   *  cd /opt/openldap; docker compose exec openldap /sbin/slapd-backup.sh all slapd > /dev/null 2>&1
+```
+
+Wie man die Sicherung zurückspielt ist im [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) unten beschrieben.
+
+
+## Olefia integration (falls nötig)
 
 [Ofelia](https://github.com/mcuadros/ofelia) is a modern and low footprint job scheduler for docker environments, built on Go. We make a backup of `slapd` with the help of this service.
 
