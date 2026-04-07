@@ -488,7 +488,7 @@ docker rmi [container id]
 
 ## Sicherung mit Hilfe von Bashscript (bevorzugt)
 
-Für die Sicherung von OpenLDAP wird [Ofelia](https://github.com/mcuadros/ofelia) nicht mehr benutzt. Ich habe ein [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) für die Sicherung geschrieben. Das Script befindet sich im Container im Pfad `/sbinslapd-backup.sh`. Für die regelmaessige Sichernug muss man ein `Cronjob` erstellen.
+Für die Sicherung von OpenLDAP wird [Ofelia](https://github.com/mcuadros/ofelia) nicht mehr benutzt. Ich habe ein [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) für die Sicherung geschrieben. Das Script befindet sich im Container unter `/sbin/slapd-backup.sh`. Für die regelmaessige Sichernug muss man ein `Cronjob` erstellen.
 
 - Hilfe zum Script abrufen
 
