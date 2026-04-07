@@ -514,7 +514,7 @@ crontab -e
 > Für die Anzahl von Sicherungen muss unter `.env`-Datei die Variable `LDAP_BACKUP_TTL` angepasst werden. Bei der Sicherung von `Daten` und `Konfiguration` werden zwei Dateien erzeugt. Wenn man z.B. `7` letzten Sicherungen beibehalten will, mossman die Variable `LDAP_BACKUP_TTL=14` setzen.
 
 
-> [!INFO]
+> [!NOTE]
 > Wie man die Sicherung zurückspielt ist im [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) unten beschrieben.
 
 
