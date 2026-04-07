@@ -506,11 +506,16 @@ crontab -e
 - Zur Sicherung von sowohl `Daten` als auch `Konfiguration` folgende Zeilen einfügen
 
 ```bash
-#min hour day mon dow command
+# Backup of OpenLDAP data and config
 15   20    *   *   *  cd /opt/openldap; docker compose exec openldap /sbin/slapd-backup.sh all slapd > /dev/null 2>&1
 ```
 
-Wie man die Sicherung zurückspielt ist im [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) unten beschrieben.
+> [!TIP]
+> Für die Anzahl von Sicherungen muss unter `.env`-Datei die Variable `LDAP_BACKUP_TTL` angepasst werden. Bei der Sicherung von `Daten` und `Konfiguration` werden zwei Dateien erzeugt. Wenn man z.B. `7` letzten Sicherungen beibehalten will, mossman die Variable `LDAP_BACKUP_TTL=14` setzen.
+
+
+> [!INFO]
+> Wie man die Sicherung zurückspielt ist im [Bashscript](https://github.com/johann8/openldap-alpine/blob/master/rootfs/sbin/slapd-backup.sh) unten beschrieben.
 
 
 ## Olefia integration (falls nötig)
