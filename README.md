@@ -11,6 +11,7 @@
   - [Traefik integration](#traefik-integration)
   - [Authelia integration](#authelia-integration)
   - [PhpLdapAdmin integration](#phpldapadmin-integration)
+  - [Sicherung mit Hilfe von Bashscript](#sicherung-mit-hilfe-von-bashscript-bevorzugt)
   - [Olefia integration](#olefia-integration)
   - [Add ldap schema  to old docker container](#add-ldap-schema-to-old-docker-container)
 
