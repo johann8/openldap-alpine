@@ -134,9 +134,9 @@ echo "Info: Backup SLAPD configuration and data done."
 
 END_TIME="$(date -R)"
 echo ""
-echo "---------------------------------------------------------------------" >&2
+echo "---------------------------------------------------------------------"
 echo "| Info: Script exiting normally at: $END_TIME |"
-echo "---------------------------------------------------------------------" >&2
+echo "---------------------------------------------------------------------"
 
 exit 0
 
@@ -144,7 +144,7 @@ exit 0
 ### ---> Information about Backup and Restore <---
 #
 
-### Backup Cronjob
+### Backup - create cronjob
 crontab -e
 ----
 #min hour day mon dow command
