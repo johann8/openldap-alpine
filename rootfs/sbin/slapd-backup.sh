@@ -8,7 +8,7 @@
 SCRIPT_START_TIME=$SECONDS                                # Script start time
 SCRIPT_NAME="slapd-backup.sh"
 BASENAME=${SCRIPT_NAME}
-SCRIPT_VERSION="0.0.4"
+SCRIPT_VERSION="0.0.5"
 TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
 _DATUM="$(date '+%Y-%m-%d %Hh:%Mm:%Ss')"
 FILENAME=$2
