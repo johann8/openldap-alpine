@@ -134,7 +134,7 @@ find ${BACKUP_PATH} -type f -mtime +${LDAP_BACKUP_TTL} -exec rm {} \;
 
 echo ""
 echo "Info: Backup SLAPD configuration and data done."
-${TREE_COMMAND} -ifFrh ${BACKUP_PATH}  
+${TREE_COMMAND} -ifFrh ${BACKUP_PATH} | grep gz
 
 END_TIME="$(date -R)"
 echo ""
