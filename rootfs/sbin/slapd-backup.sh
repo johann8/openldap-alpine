@@ -8,7 +8,7 @@
 SCRIPT_START_TIME=$SECONDS                                # Script start time
 SCRIPT_NAME="slapd-backup.sh"
 BASENAME=${SCRIPT_NAME}
-SCRIPT_VERSION="0.0.5"
+SCRIPT_VERSION="0.0.6"
 TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
 _DATUM="$(date '+%Y-%m-%d %Hh:%Mm:%Ss')"
 FILENAME=$2
@@ -26,6 +26,9 @@ SLAPCAT_COMMAND=`command -v slapcat`
 
 # gtip binary path
 GZIP_COMMAND=`command -v gzip`
+
+# tree binary path
+TREE_COMMAND=`command -v tree`
 
 ### Functions
 # show_help
@@ -131,6 +134,7 @@ find ${BACKUP_PATH} -type f -mtime +${LDAP_BACKUP_TTL} -exec rm {} \;
 
 echo ""
 echo "Info: Backup SLAPD configuration and data done."
+${TREE_COMMAND} -ifFrh ${BACKUP_PATH}  
 
 END_TIME="$(date -R)"
 echo ""
