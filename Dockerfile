@@ -1,8 +1,4 @@
-ARG ARCH=
-
-ARG BASE_IMAGE=alpine:3.23
-
-FROM ${ARCH}${BASE_IMAGE}
+FROM alpine:3.23
 
 LABEL Maintainer="JH <jh@localhost>" \
       Description="Docker container with OpenLDAP based on Alpine Linux."
@@ -10,13 +6,14 @@ LABEL Maintainer="JH <jh@localhost>" \
 ARG BUILD_DATE
 ARG NAME
 ARG VCS_REF
-ARG OPENLDAP_VERSION=2.6.10-r0
+ARG OPENLDAP_VERSION=2.6.13-r0
 
-LABEL org.label-schema.build-date=$BUILD_DATE \
+LABEL org.label-schema.schema-version="1.0" \
+      org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.license=GPL-3.0 \
       org.label-schema.name=openldap \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url=https://github.com/instantlinux/docker-tools
+      org.label-schema.vcs-url="https://github.com/johann8/openldap-alpine"
 
 
 ENV OPENLDAP_VERSION=${OPENLDAP_VERSION}
