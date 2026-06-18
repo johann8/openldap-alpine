@@ -3,12 +3,15 @@
 # set variables
 D_IMAGE_VERSION=0.3.0
 D_IMAGE_TAG=alpine-openldap
+BASE_IMAGE=alpine:3.24
 OPENLDAP_VERSION=2.6.13-r0
+BASE_IMAGE=alpine:3.2
 
 # build image openldap
 DOCKER_BUILDKIT=0; 
 
 docker build \
+  --build-arg=BASE_IMAGE=${BASE_IMAGE} \
   --build-arg=OPENLDAP_VERSION=${OPENLDAP_VERSION} \
   --platform=linux/amd64 \
   --tag=johann8/${D_IMAGE_TAG}:${D_IMAGE_VERSION} \
