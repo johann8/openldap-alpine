@@ -1,4 +1,6 @@
-FROM alpine:3.24
+ARG BASE_IMAGE=alpine:3.24
+
+FROM ${BASE_IMAGE}
 
 LABEL Maintainer="JH <jh@localhost>" \
       Description="Docker container with OpenLDAP based on Alpine Linux."
