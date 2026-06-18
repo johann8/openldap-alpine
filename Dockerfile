@@ -1,4 +1,4 @@
-FROM alpine:3.23
+FROM alpine:3.24
 
 LABEL Maintainer="JH <jh@localhost>" \
       Description="Docker container with OpenLDAP based on Alpine Linux."
