@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # set variables
-D_IMAGE_VERSION=0.2.8
+D_IMAGE_VERSION=0.3.0
 D_IMAGE_TAG=alpine-openldap
 OPENLDAP_VERSION=2.6.13-r0
 
